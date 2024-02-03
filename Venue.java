@@ -1,7 +1,7 @@
 import java.lang.String;
 
 
-public abstract class Venue extends VenueManager {
+public abstract class Venue {
     public String venueID;
     public int maxCapacity;
     public String venueFunction;
@@ -14,34 +14,34 @@ public abstract class Venue extends VenueManager {
 }
 
 class LectureHall extends Venue {
-    static final String venueFunction  = "Lecture Hall";
+    public static final String VENUE_FUNCTION = "Lecture Hall";
  
     LectureHall(String venueID, int maxCapacity) {
-        super(venueID, maxCapacity, venueFunction);
+        super(venueID, maxCapacity, VENUE_FUNCTION);
     }
 }
 
 class TutorialRoom extends Venue {
-    static final String venueFunction = "Tutorial Room";
+    public static final String VENUE_FUNCTION = "Tutorial Room";
 
     TutorialRoom(String venueID, int maxCapacity) {
-        super(venueID, maxCapacity, venueFunction);
+        super(venueID, maxCapacity, VENUE_FUNCTION);
     }
 }
 
 class LabRoom extends Venue {
-    static final String venueFunction = "Lab Room";
+    public static final String VENUE_FUNCTION = "Lab Room";
 
     LabRoom(String venueID, int maxCapacity) {
-        super(venueID, maxCapacity, venueFunction);
+        super(venueID, maxCapacity, VENUE_FUNCTION);
     }
 }
 
 class Court extends Venue {
-    static final String venueFunction = "Court";
+    public static final String VENUE_FUNCTION = "Court";
 
     Court(String venueID, int maxCapacity) {
-        super(venueID, maxCapacity, venueFunction);
+        super(venueID, maxCapacity, VENUE_FUNCTION);
     }
 }
 

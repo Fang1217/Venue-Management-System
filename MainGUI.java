@@ -21,7 +21,7 @@ public class MainGUI {
 
     public void initialize() {
         frame = new JFrame("Login");
-        frame.setBounds(100, 120, 400, 600);
+        frame.setBounds(100, 120, 400, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
@@ -52,30 +52,30 @@ public class MainGUI {
          * panel.add(logoLabel);
          */
 
-        JLabel reservationLabel = new JLabel("<html>University Venue Reservation System</html>");
+        JLabel reservationLabel = new JLabel("<html><center>University Venue Reservation System</html>");
         reservationLabel.setFont(new Font("Arial", Font.BOLD, 18));
         reservationLabel.setHorizontalAlignment(SwingConstants.CENTER);
         reservationLabel.setBounds(50, 60, 300, 50);
         panel.add(reservationLabel);
 
         JLabel userLabel = new JLabel("Username:");
-        userLabel.setBounds(10, 100, 80, 25);
+        userLabel.setBounds(10, 130, 80, 25);
         panel.add(userLabel);
 
         usernameField = new JTextField(20);
-        usernameField.setBounds(100, 100, 250, 25);
+        usernameField.setBounds(100, 130, 250, 25);
         panel.add(usernameField);
 
         JLabel passwordLabel = new JLabel("Password:");
-        passwordLabel.setBounds(10, 130, 80, 25);
+        passwordLabel.setBounds(10, 160, 80, 25);
         panel.add(passwordLabel);
 
         JPasswordField passwordField = new JPasswordField(20);
-        passwordField.setBounds(100, 130, 250, 25);
+        passwordField.setBounds(100, 160, 250, 25);
         panel.add(passwordField);
 
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(160, 160, 80, 25);
+        loginButton.setBounds(160, 200, 80, 25);
         panel.add(loginButton);
 
         JLabel errorMsgLabel = new JLabel("");

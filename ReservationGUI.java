@@ -1,20 +1,18 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
 import javax.swing.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ReservationGUI {
     private static JFrame venueManagementFrame;
 
-    private static VenueManager venueManager = new VenueManager();
     private static ReservationManager reservationManager = new ReservationManager();
-
 
     public static void display() {
         venueManagementFrame = new JFrame("University Venue Management System");
-        venueManagementFrame.setBounds(100, 100, 1000, 800);
+        venueManagementFrame.setBounds(100, 100, 800, 600);
         venueManagementFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Create a tabbed pane
@@ -61,7 +59,7 @@ public class ReservationGUI {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         JButton logoutButton = new JButton("Log Out");
-        //JButton checkSalesButton = new JButton("Check Past Sales");
+        // JButton checkSalesButton = new JButton("Check Past Sales");
 
         bottomPanel.add(logoutButton);
 
@@ -89,33 +87,47 @@ public class ReservationGUI {
     }
 
     private static JPanel ReservationManager() {
-        JPanel tabPanel = new JPanel(new GridLayout(0, 3, 20, 50));
-        JTextField venueIDField, dateField, timeField;
-        JTextArea displayArea = new JTextArea();
-        reservationManager = new ReservationManager();
-
-        JPanel inputPanel = new JPanel(new GridLayout(4, 2));
-
-        inputPanel.add(new JLabel("Venue ID:"));
-        venueIDField = new JTextField();
-        inputPanel.add(venueIDField);
-
-        inputPanel.add(new JLabel("Date:"));
-        dateField = new JTextField();
-        inputPanel.add(dateField);
+        JPanel tabPanel = new JPanel(new GridLayout(1, 2, 20, 50));
         
-        inputPanel.add(new JLabel("Time:"));
-        timeField = new JTextField();
-        inputPanel.add(timeField);
+        JPanel leftPanel = new JPanel(new GridLayout(0, 1, 20, 50));
+    
+        // Display panel, containing table
+        JTextArea displayArea = new JTextArea();
+        displayArea.setText(reservationManager.displayReservations());
+        displayArea.setEditable(false);
 
+        reservationManager = new ReservationManager();
+        
+        JPanel fieldPanel = new JPanel(new GridLayout(0, 2));
+        
+        JTextField venueIDField, dateField;
+        fieldPanel.add(new JLabel("Venue ID:"));
+        venueIDField = new JTextField();
+        fieldPanel.add(venueIDField);
+        fieldPanel.add(new JLabel("Date:"));
+        dateField = new JTextField();
+        fieldPanel.add(dateField);
+
+        fieldPanel.add(new JLabel("Time:"));
+        Choice timeChoice = new Choice();
+        timeChoice.add("8am - 10am");
+        timeChoice.add("10am - 12pm");
+        timeChoice.add("12pm - 2pm");
+        timeChoice.add("2pm - 4pm");
+        timeChoice.add("4pm - 6pm");
+
+        fieldPanel.add(timeChoice);
+        fieldPanel.add(new JLabel(""));
+        fieldPanel.add(new JLabel(""));
+        
         JButton addButton = new JButton("Add Reservation");
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String venueID = venueIDField.getText();
                 String date = dateField.getText();
-                String time = timeField.getText();
-                reservationManager.add(venueID, date, time);
-                displayArea.setText(reservationManager.display());
+                String time = timeChoice.getSelectedItem();
+                reservationManager.addReservation(venueID, date, time);
+                displayArea.setText(reservationManager.displayReservations());
             }
         });
 
@@ -124,88 +136,156 @@ public class ReservationGUI {
             public void actionPerformed(ActionEvent e) {
                 String venueID = venueIDField.getText();
                 String date = dateField.getText();
-                String time = timeField.getText();
-                reservationManager.delete(venueID, date, time);
-                displayArea.setText(reservationManager.display());
+                String time = timeChoice.getSelectedItem();
+                reservationManager.deleteReservation(venueID, date, time);
+                displayArea.setText(reservationManager.displayReservations());
             }
         });
 
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
+        JPanel buttonPanel = new JPanel();
         buttonPanel.add(addButton);
         buttonPanel.add(deleteButton);
 
         displayArea.setEditable(false);
 
-        tabPanel.setLayout(new BorderLayout());
-        tabPanel.add(inputPanel, BorderLayout.NORTH);
-        tabPanel.add(buttonPanel, BorderLayout.CENTER);
-        tabPanel.add(displayArea, BorderLayout.SOUTH);
+        leftPanel.add(fieldPanel);
+        leftPanel.add(buttonPanel);
+
+        tabPanel.add(leftPanel);
+        JScrollPane displayPane = new JScrollPane(displayArea);
+        tabPanel.add(displayPane);
         return tabPanel;
 
     }
 
     private static JPanel VenueManagement() {
-        JPanel tabPanel = new JPanel(new GridLayout(0, 3, 20, 50));
-        JTextField venueIdField;
-        JTextField maxCapacityField;
-        JTextField venueFunctionField;
-        JTextArea displayArea = new JTextArea();
+        JPanel tabPanel = new JPanel(new GridLayout(1, 2, 20, 50));
 
-        JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new GridLayout(5, 2));
+        JPanel leftPanel = new JPanel(new GridLayout(0, 1, 20, 50));
+
+        // Field panel, containing fields
+        JPanel fieldPanel = new JPanel(new GridLayout(2, 2));
 
         JLabel venueIdLabel = new JLabel("Venue ID:");
-        controlPanel.add(venueIdLabel);
-        venueIdField = new JTextField();
-        controlPanel.add(venueIdField);
-
+        JTextField venueIdField = new JTextField();
         JLabel maxCapacityLabel = new JLabel("Max Capacity:");
-        controlPanel.add(maxCapacityLabel);
-        maxCapacityField = new JTextField();
-        controlPanel.add(maxCapacityField);
-
+        JTextField maxCapacityField = new JTextField();
         JLabel venueFunctionLabel = new JLabel("Venue Function:");
-        controlPanel.add(venueFunctionLabel);
-        venueFunctionField = new JTextField();
-        controlPanel.add(venueFunctionField);
+        fieldPanel.add(venueIdLabel);
+        fieldPanel.add(venueIdField);
+        fieldPanel.add(maxCapacityLabel);
+        fieldPanel.add(maxCapacityField);
 
+        ButtonGroup venueFunctionGroup = new ButtonGroup();
+        JRadioButton lectureHallButton = new JRadioButton("Lecture Hall");
+        lectureHallButton.setActionCommand("Lecture Hall");
+        JRadioButton tutorialRoomButton = new JRadioButton("Tutorial Room");
+        tutorialRoomButton.setActionCommand("Tutorial Room");
+        JRadioButton labRoomButton = new JRadioButton("Lab Room");
+        labRoomButton.setActionCommand("Lab Room");
+        JRadioButton courtButton = new JRadioButton("Court");
+        courtButton.setActionCommand("Court");
+        JRadioButton otherVenueButton = new JRadioButton("Other");
+        otherVenueButton.setActionCommand("Other");
+        JTextField otherVenueFunctionField;
+        otherVenueFunctionField = new JTextField();
+
+        venueFunctionGroup.add(lectureHallButton);
+        venueFunctionGroup.add(tutorialRoomButton);
+        venueFunctionGroup.add(labRoomButton);
+        venueFunctionGroup.add(courtButton);
+        venueFunctionGroup.add(otherVenueButton);
+
+        JPanel venueFunctionPanel = new JPanel(new GridLayout(7, 2));
+        venueFunctionPanel.add(venueFunctionLabel);
+        venueFunctionPanel.add(new JPanel());
+        venueFunctionPanel.add(labRoomButton);
+        venueFunctionPanel.add(new JPanel());
+        venueFunctionPanel.add(tutorialRoomButton);
+        venueFunctionPanel.add(new JPanel());
+        venueFunctionPanel.add(lectureHallButton);
+        venueFunctionPanel.add(new JPanel());
+        venueFunctionPanel.add(courtButton);
+        venueFunctionPanel.add(new JPanel());
+        venueFunctionPanel.add(otherVenueButton);
+        venueFunctionPanel.add(otherVenueFunctionField);
+
+        // Display panel, containing table
+        JTextArea displayArea = new JTextArea();
+        displayArea.setText(reservationManager.displayVenues());
+        displayArea.setEditable(false);
+
+        otherVenueFunctionField.setEnabled(false); // Initially disable the text field
+        lectureHallButton.addActionListener(e -> otherVenueFunctionField.setEnabled(false));
+        tutorialRoomButton.addActionListener(e -> otherVenueFunctionField.setEnabled(false));
+        labRoomButton.addActionListener(e -> otherVenueFunctionField.setEnabled(false));
+        courtButton.addActionListener(e -> otherVenueFunctionField.setEnabled(false));
+        otherVenueButton.addActionListener(e -> otherVenueFunctionField.setEnabled(true));
+
+        // Buttons
+        JPanel buttonPanel = new JPanel();
         JButton addButton = new JButton("Add Venue");
+        buttonPanel.add(addButton);
+        JButton editButton = new JButton("Edit Venue");
+        buttonPanel.add(editButton);
+        JButton deleteButton = new JButton("Delete Venue");
+        buttonPanel.add(deleteButton);
+
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String venueId = venueIdField.getText();
                 int maxCapacity = Integer.parseInt(maxCapacityField.getText());
-                String venueFunction = venueFunctionField.getText();
-
-                // Assuming you have a method in VenueManager to add a venue
-                // venueManager.addVenue(venueId, maxCapacity, venueFunction);
-                // You would then update the display accordingly
-                // displayArea.setText(venueManager.display());
+                String venueFunction;
+                if (otherVenueButton.isSelected()) {
+                    venueFunction = otherVenueFunctionField.getText();
+                } else {
+                    venueFunction = venueFunctionGroup.getSelection().getActionCommand();
+                }
+                reservationManager.addVenue(venueId, maxCapacity, venueFunction);
+                displayArea.setText(reservationManager.displayReservations());
             }
         });
-        controlPanel.add(addButton);
-
-        JButton displayButton = new JButton("Display Venues");
-        displayButton.addActionListener(new ActionListener() {
+        editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                displayArea.setText(venueManager.display());
+                String venueId = venueIdField.getText();
+                int maxCapacity = Integer.parseInt(maxCapacityField.getText());
+                String venueFunction;
+                if (otherVenueButton.isSelected()) {
+                    venueFunction = otherVenueFunctionField.getText();
+                } else {
+                    venueFunction = venueFunctionGroup.getSelection().getActionCommand();
+                }
+                reservationManager.editVenue(venueId, maxCapacity, venueFunction);
+                displayArea.setText(reservationManager.displayVenues());
             }
         });
-        controlPanel.add(displayButton);
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String venueId = venueIdField.getText();
+                reservationManager.deleteVenue(venueId);
+                displayArea.setText(reservationManager.displayVenues());
+            }
+        });
 
-        displayArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(displayArea);
+        leftPanel.add(fieldPanel);
+        leftPanel.add(venueFunctionPanel);
+        leftPanel.add(buttonPanel);
 
-        tabPanel.add(controlPanel, BorderLayout.NORTH);
-        tabPanel.add(scrollPane, BorderLayout.CENTER);
-
+        tabPanel.add(leftPanel);
+        JScrollPane displayPane = new JScrollPane(displayArea);
+        tabPanel.add(displayPane);
         tabPanel.setVisible(true);
+
         return tabPanel;
+
     }
 
     private static String getCurrentTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY/MM/dd HH:mm:ss");
         return sdf.format(new Date());
     }
+
 }

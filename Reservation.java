@@ -1,4 +1,4 @@
-public class Reservation extends ReservationManager {
+public class Reservation {
     String venueID;
     String date;
     String time;
