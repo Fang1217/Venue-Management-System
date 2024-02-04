@@ -1,7 +1,12 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
+
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -38,9 +43,6 @@ public class ReservationGUI {
 
         // Top Panel for the "Cart" button (aligned to the right)
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        // ImageIcon cartIcon = new ImageIcon("images/cart.png");
-        // JButton cartButton = new JButton("CART", cartIcon);
-        // topPanel.add(cartButton);
 
         // Center Panel for the "Welcome" and "Current Time" labels
         JPanel centerPanel = new JPanel();
@@ -55,12 +57,8 @@ public class ReservationGUI {
         timeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         centerPanel.add(timeLabel);
 
-        // Bottom Panel for "Log Out" and "Check Past Sales" buttons
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
         JButton logoutButton = new JButton("Log Out");
-        // JButton checkSalesButton = new JButton("Check Past Sales");
-
         bottomPanel.add(logoutButton);
 
         // Add the panels to the main panel
@@ -88,24 +86,31 @@ public class ReservationGUI {
 
     private static JPanel ReservationManager() {
         JPanel tabPanel = new JPanel(new GridLayout(1, 2, 20, 50));
-        
+
         JPanel leftPanel = new JPanel(new GridLayout(0, 1, 20, 50));
-    
+
         // Display panel, containing table
         JTextArea displayArea = new JTextArea();
-        displayArea.setText(reservationManager.displayReservations());
+        displayArea.setText(reservationManager.displayReservation());
         displayArea.setEditable(false);
 
         reservationManager = new ReservationManager();
-        
+
         JPanel fieldPanel = new JPanel(new GridLayout(0, 2));
-        
-        JTextField venueIDField, dateField;
         fieldPanel.add(new JLabel("Venue ID:"));
-        venueIDField = new JTextField();
-        fieldPanel.add(venueIDField);
-        fieldPanel.add(new JLabel("Date:"));
+
+        JComboBox<String> venueIDComboBox = new JComboBox<>();
+        ;
+        for (Venue v : reservationManager.venues) {
+            venueIDComboBox.addItem(v.venueID);
+        }
+        fieldPanel.add(venueIDComboBox);
+
+        fieldPanel.add(new JLabel("Date (YYYY/MM/DD):"));
+
+        JTextField dateField;
         dateField = new JTextField();
+
         fieldPanel.add(dateField);
 
         fieldPanel.add(new JLabel("Time:"));
@@ -119,26 +124,36 @@ public class ReservationGUI {
         fieldPanel.add(timeChoice);
         fieldPanel.add(new JLabel(""));
         fieldPanel.add(new JLabel(""));
-        
+
         JButton addButton = new JButton("Add Reservation");
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String venueID = venueIDField.getText();
+                String venueID = (String) venueIDComboBox.getSelectedItem();
                 String date = dateField.getText();
                 String time = timeChoice.getSelectedItem();
-                reservationManager.addReservation(venueID, date, time);
-                displayArea.setText(reservationManager.displayReservations());
+                if (reservationManager.isValidReservationInput(venueID, date, time)) {
+                    reservationManager.addReservation(venueID, date, time);
+                    displayArea.setText(reservationManager.displayReservation());
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid input! Please check the fields.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
         JButton deleteButton = new JButton("Delete Reservation");
         deleteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String venueID = venueIDField.getText();
+                String venueID = (String) venueIDComboBox.getSelectedItem();
                 String date = dateField.getText();
                 String time = timeChoice.getSelectedItem();
-                reservationManager.deleteReservation(venueID, date, time);
-                displayArea.setText(reservationManager.displayReservations());
+                if (reservationManager.isValidReservationInput(venueID, date, time)) {
+                    reservationManager.deleteReservation(venueID, date, time);
+                    displayArea.setText(reservationManager.displayReservation());
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid input! Please check the fields.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -169,7 +184,7 @@ public class ReservationGUI {
         JLabel venueIdLabel = new JLabel("Venue ID:");
         JTextField venueIdField = new JTextField();
         JLabel maxCapacityLabel = new JLabel("Max Capacity:");
-        JTextField maxCapacityField = new JTextField();
+        JTextField maxCapacityField = new JFormattedTextField(createFormatter("####"));
         JLabel venueFunctionLabel = new JLabel("Venue Function:");
         fieldPanel.add(venueIdLabel);
         fieldPanel.add(venueIdField);
@@ -177,7 +192,7 @@ public class ReservationGUI {
         fieldPanel.add(maxCapacityField);
 
         ButtonGroup venueFunctionGroup = new ButtonGroup();
-        JRadioButton lectureHallButton = new JRadioButton("Lecture Hall");
+        JRadioButton lectureHallButton = new JRadioButton("Lecture Hall", true);
         lectureHallButton.setActionCommand("Lecture Hall");
         JRadioButton tutorialRoomButton = new JRadioButton("Tutorial Room");
         tutorialRoomButton.setActionCommand("Tutorial Room");
@@ -199,11 +214,11 @@ public class ReservationGUI {
         JPanel venueFunctionPanel = new JPanel(new GridLayout(7, 2));
         venueFunctionPanel.add(venueFunctionLabel);
         venueFunctionPanel.add(new JPanel());
-        venueFunctionPanel.add(labRoomButton);
+        venueFunctionPanel.add(lectureHallButton);
         venueFunctionPanel.add(new JPanel());
         venueFunctionPanel.add(tutorialRoomButton);
         venueFunctionPanel.add(new JPanel());
-        venueFunctionPanel.add(lectureHallButton);
+        venueFunctionPanel.add(labRoomButton);
         venueFunctionPanel.add(new JPanel());
         venueFunctionPanel.add(courtButton);
         venueFunctionPanel.add(new JPanel());
@@ -212,7 +227,7 @@ public class ReservationGUI {
 
         // Display panel, containing table
         JTextArea displayArea = new JTextArea();
-        displayArea.setText(reservationManager.displayVenues());
+        displayArea.setText(reservationManager.displayVenue());
         displayArea.setEditable(false);
 
         otherVenueFunctionField.setEnabled(false); // Initially disable the text field
@@ -242,8 +257,14 @@ public class ReservationGUI {
                 } else {
                     venueFunction = venueFunctionGroup.getSelection().getActionCommand();
                 }
-                reservationManager.addVenue(venueId, maxCapacity, venueFunction);
-                displayArea.setText(reservationManager.displayReservations());
+
+                if (reservationManager.isValidVenueInput(venueId, maxCapacity, venueFunction)) {
+                    reservationManager.addVenue(venueId, maxCapacity, venueFunction);
+                    displayArea.setText(reservationManager.displayVenue());
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid input! Please check the fields.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         editButton.addActionListener(new ActionListener() {
@@ -257,8 +278,13 @@ public class ReservationGUI {
                 } else {
                     venueFunction = venueFunctionGroup.getSelection().getActionCommand();
                 }
-                reservationManager.editVenue(venueId, maxCapacity, venueFunction);
-                displayArea.setText(reservationManager.displayVenues());
+                if (reservationManager.isValidVenueInput(venueId, maxCapacity, venueFunction)) {
+                    reservationManager.editVenue(venueId, maxCapacity, venueFunction);
+                    displayArea.setText(reservationManager.displayVenue());
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid input! Please check the fields.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         deleteButton.addActionListener(new ActionListener() {
@@ -266,7 +292,7 @@ public class ReservationGUI {
             public void actionPerformed(ActionEvent e) {
                 String venueId = venueIdField.getText();
                 reservationManager.deleteVenue(venueId);
-                displayArea.setText(reservationManager.displayVenues());
+                displayArea.setText(reservationManager.displayVenue());
             }
         });
 
@@ -288,4 +314,14 @@ public class ReservationGUI {
         return sdf.format(new Date());
     }
 
+    static protected MaskFormatter createFormatter(String s) {
+        MaskFormatter formatter = null;
+        try {
+            formatter = new MaskFormatter(s);
+        } catch (java.text.ParseException exc) {
+            System.err.println("formatter is bad: " + exc.getMessage());
+            System.exit(-1);
+        }
+        return formatter;
+    }
 }

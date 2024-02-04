@@ -6,14 +6,14 @@ class ReservationManager {
 
     private final File RESERVATION_SAVE_FILE = new File("Reservation.txt");
     private final File VENUE_SAVE_FILE = new File("Venue.txt");
-    private ArrayList<Reservation> reservations = new ArrayList<Reservation>();
-    private ArrayList<Venue> venues = new ArrayList<Venue>();
+    public ArrayList<Reservation> reservations = new ArrayList<Reservation>();
+    public ArrayList<Venue> venues = new ArrayList<Venue>();
 
     ReservationManager() {
         load();
     }
 
-    public String displayVenues() {
+    public String displayVenue() {
         StringBuilder venueInfo = new StringBuilder("Venue Record:\n");
         for (Venue v : venues) {
             venueInfo.append(v.venueID + "\t" + v.maxCapacity + "\t" + v.venueFunction + "\n");
@@ -22,6 +22,21 @@ class ReservationManager {
     }
 
     void addVenue(String venueID, int maxCapacity, String venueFunction) {
+        Venue v;
+
+        if (venueFunction == "Lecture Hall")
+            v = new LectureHall(venueID, maxCapacity);
+        else if (venueFunction == "Lab Room")
+            v = new LabRoom(venueID, maxCapacity);
+        else if (venueFunction == "Tutorial Room")
+            v = new TutorialRoom(venueID, maxCapacity);
+        else if (venueFunction == "Court")
+            v = new Court(venueID, maxCapacity);
+        else
+            v = new OtherVenue(venueID, maxCapacity, venueFunction);
+
+        venues.add(v);
+        saveVenue();
     }
 
     void deleteVenue(String VenueID) {
@@ -35,6 +50,7 @@ class ReservationManager {
         }
         if (venueFound) {
             System.out.println("The venue deleted successfully!");
+            saveVenue();
         } else {
             System.out.println("The venue does not exist.");
         }
@@ -45,11 +61,11 @@ class ReservationManager {
             if (v.venueID.equals(venueID)) {
                 v.maxCapacity = maxCapacity;
                 v.venueFunction = venueFunction;
+                saveVenue();
             }
         }
-        saveVenue();
     }
-
+    
     void addReservation(String venueID, String date, String time) {
         boolean venueFound = false;
 
@@ -67,8 +83,7 @@ class ReservationManager {
             reservations.add(new Reservation(venueID, date, time));
             saveReservation();
             System.out.println("The reservation added successfully!");
-        } 
-        else
+        } else
             System.out.println("Invalid Venue ID.");
 
     }
@@ -84,14 +99,14 @@ class ReservationManager {
         }
         if (reservationFound) {
             System.out.println("The reservation deleted successfully!");
+            saveReservation();
         } else {
             System.out.println("The reservation does not exist.");
         }
 
-        saveReservation();
     }
 
-    String displayReservations() {
+    String displayReservation() {
         StringBuilder reservationInfo = new StringBuilder("Reservation Record:\n");
         for (Reservation r : reservations) {
             reservationInfo.append(r.venueID + "\t" + r.date + "\t" + r.time + "\n");
@@ -99,88 +114,111 @@ class ReservationManager {
         return reservationInfo.toString();
     }
 
+    boolean isValidReservationInput(String venueID, String date, String time) {
+        return !venueID.isEmpty() && !date.isEmpty() && !time.isEmpty();
+    }
+
+    boolean isValidVenueInput(String venueID, int maxCapacity, String venueFunction) {
+        return !venueID.isEmpty() && !(maxCapacity == 0) && !venueFunction.isEmpty();
+    }
+
     // Load
     private void load() {
-        try {
-            Scanner venueFileReader = new Scanner(VENUE_SAVE_FILE);
-            while (venueFileReader.hasNextLine()) {
-                String data = venueFileReader.nextLine();
 
-                String[] data_split = data.split(",");
-                String venueID = data_split[0];
-                int maxCapacity = Integer.parseInt(data_split[1]);
-                String venueFunction = data_split[2];
+        if (VENUE_SAVE_FILE.exists())
+            try {
+                Scanner venueFileReader = new Scanner(VENUE_SAVE_FILE);
+                while (venueFileReader.hasNextLine()) {
+                    String data = venueFileReader.nextLine();
 
-                Venue v;
+                    String[] data_split = data.split(",");
+                    String venueID = data_split[0];
+                    int maxCapacity = Integer.parseInt(data_split[1]);
+                    String venueFunction = data_split[2];
 
-                if (venueFunction == "Lecture Hall")
-                    v = new LectureHall(venueID, maxCapacity);
-                else if (venueFunction == "Lab Room")
-                    v = new LabRoom(venueID, maxCapacity);
-                else if (venueFunction == "Tutorial Room")
-                    v = new TutorialRoom(venueID, maxCapacity);
-                else if (venueFunction == "Court")
-                    v = new Court(venueID, maxCapacity);
-                else
-                    v = new OtherVenue(venueID, maxCapacity, venueFunction);
+                    Venue v;
 
-                venues.add(v);
+                    if (venueFunction == "Lecture Hall")
+                        v = new LectureHall(venueID, maxCapacity);
+                    else if (venueFunction == "Lab Room")
+                        v = new LabRoom(venueID, maxCapacity);
+                    else if (venueFunction == "Tutorial Room")
+                        v = new TutorialRoom(venueID, maxCapacity);
+                    else if (venueFunction == "Court")
+                        v = new Court(venueID, maxCapacity);
+                    else
+                        v = new OtherVenue(venueID, maxCapacity, venueFunction);
+
+                    venues.add(v);
+                }
+                venueFileReader.close();
+            } catch (IOException e) {
+                System.out.println("Error occured while reading the file.");
+                e.printStackTrace();
             }
-            venueFileReader.close();
-        } catch (IOException e) {
-            System.out.println("Error occured while reading the file.");
-            e.printStackTrace();
-        }
 
-        try {
-            Scanner reservationFileReader = new Scanner(RESERVATION_SAVE_FILE);
-            while (reservationFileReader.hasNextLine()) {
-                String data = reservationFileReader.nextLine();
+        if (RESERVATION_SAVE_FILE.exists())
+            try {
+                Scanner reservationFileReader = new Scanner(RESERVATION_SAVE_FILE);
+                while (reservationFileReader.hasNextLine()) {
+                    String data = reservationFileReader.nextLine();
 
-                String[] data_split = data.split(",");
-                String venueID = data_split[0];
-                String date = data_split[1];
-                String time = data_split[2];
+                    String[] data_split = data.split(",");
+                    String venueID = data_split[0];
+                    String date = data_split[1];
+                    String time = data_split[2];
 
-                reservations.add(new Reservation(venueID, date, time));
+                    reservations.add(new Reservation(venueID, date, time));
+                }
+                reservationFileReader.close();
+            } catch (IOException e) {
+                System.out.println("Error occured while reading the file.");
+                e.printStackTrace();
             }
-            reservationFileReader.close();
-        } catch (IOException e) {
-            System.out.println("Error occured while reading the file.");
-            e.printStackTrace();
-        }
     }
 
     private void saveVenue() {
-        if (!VENUE_SAVE_FILE.delete())
-            return;
-
         try {
-            FileWriter saveFileWriter = new FileWriter(VENUE_SAVE_FILE, true);
+            if (VENUE_SAVE_FILE.exists())
+                VENUE_SAVE_FILE.delete();
+
+            VENUE_SAVE_FILE.createNewFile();
+
+            FileWriter fileWriter = new FileWriter(VENUE_SAVE_FILE);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
             for (Venue v : venues) {
-                saveFileWriter.write(v.venueID + "," + v.maxCapacity + "," + v.venueFunction + "\n");
+                bufferedWriter.write(v.venueID + "," + v.maxCapacity + "," + v.venueFunction + "\n");
             }
-            saveFileWriter.close();
+
+            bufferedWriter.close();
+            System.out.println("File has been written successfully!");
+
         } catch (IOException e) {
-            System.out.println("Error occured while reading the file.");
+            System.out.println("An error occurred: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     private void saveReservation() {
-        if (!RESERVATION_SAVE_FILE.delete())
-            return;
-
         try {
-            FileWriter saveFileWriter = new FileWriter(RESERVATION_SAVE_FILE, true);
+            if (RESERVATION_SAVE_FILE.exists())
+                RESERVATION_SAVE_FILE.delete();
+
+            RESERVATION_SAVE_FILE.createNewFile();
+
+            FileWriter fileWriter = new FileWriter(RESERVATION_SAVE_FILE);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
             for (Reservation r : reservations) {
-                saveFileWriter.write(r.venueID + "," + r.date + "," + r.time + "\n");
+                bufferedWriter.write(r.venueID + "," + r.date + "," + r.time + "\n");
             }
-            saveFileWriter.close();
+
+            bufferedWriter.close();
+            System.out.println("File has been written successfully!");
+
         } catch (IOException e) {
-            System.out.println("Error occured while reading the file.");
+            System.out.println("An error occurred: " + e.getMessage());
             e.printStackTrace();
         }
     }
