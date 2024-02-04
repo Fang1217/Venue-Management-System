@@ -14,9 +14,44 @@ class ReservationManager {
     }
 
     public String displayVenue() {
+
         StringBuilder venueInfo = new StringBuilder("Venue Record:\n");
+
+        if (venues.isEmpty()) {
+            venueInfo.append("No venues found.");
+            return venueInfo.toString();
+        }
+
+        // Find the length of the longest string in each column for formatting
+        int maxLengthVenueID = "Venue ID".length();
+        int maxLengthMaxCapacity = "Max Capacity".length();
+        int maxLengthVenueFunction = "Venue Function".length();
+
         for (Venue v : venues) {
-            venueInfo.append(v.venueID + "\t" + v.maxCapacity + "\t" + v.venueFunction + "\n");
+            maxLengthVenueID = Math.max(maxLengthVenueID, v.venueID.length());
+            maxLengthMaxCapacity = Math.max(maxLengthMaxCapacity, String.valueOf(v.maxCapacity).length());
+            maxLengthVenueFunction = Math.max(maxLengthVenueFunction, v.venueFunction.length());
+        }
+
+        // Constructing header
+        venueInfo.append(String.format("%1$-" + (maxLengthVenueID + 2) + "s", "Venue ID"));
+        venueInfo.append(String.format("%1$-" + (maxLengthMaxCapacity + 2) + "s", "Max Capacity"));
+        venueInfo.append(String.format("%1$-" + (maxLengthVenueFunction + 2) + "s", "Venue Function"));
+
+        venueInfo.append("\n");
+
+        // Constructing separator line
+        for (int i = 0; i < maxLengthVenueID + maxLengthMaxCapacity + maxLengthVenueFunction + 6; i++) {
+            venueInfo.append("-");
+        }
+        venueInfo.append("\n");
+
+        // Constructing rows
+        for (Venue v : venues) {
+            venueInfo.append(String.format("%1$-" + (maxLengthVenueID + 2) + "s", v.venueID));
+            venueInfo.append(String.format("%1$-" + (maxLengthMaxCapacity + 2) + "s", String.valueOf(v.maxCapacity)));
+            venueInfo.append(String.format("%1$-" + (maxLengthVenueFunction + 2) + "s", v.venueFunction));
+            venueInfo.append("\n");
         }
         return venueInfo.toString();
     }
@@ -65,7 +100,7 @@ class ReservationManager {
             }
         }
     }
-    
+
     void addReservation(String venueID, String date, String time) {
         boolean venueFound = false;
 
@@ -108,8 +143,42 @@ class ReservationManager {
 
     String displayReservation() {
         StringBuilder reservationInfo = new StringBuilder("Reservation Record:\n");
+
+        if (reservations.isEmpty()) {
+            reservationInfo.append("No reservations found.");
+            return reservationInfo.toString();
+        }
+
+        //// Construct a table, where the inputs are based on longest data.
+        // Find the length of the longest string in each column for formatting
+        int maxLengthVenueID = "Venue ID".length();
+        int maxLengthDate = "Date".length();
+        int maxLengthTime = "Time".length();
+
         for (Reservation r : reservations) {
-            reservationInfo.append(r.venueID + "\t" + r.date + "\t" + r.time + "\n");
+            maxLengthVenueID = Math.max(maxLengthVenueID, r.venueID.length());
+            maxLengthDate = Math.max(maxLengthDate, r.date.length());
+            maxLengthTime = Math.max(maxLengthTime, r.time.length());
+        }
+
+        // Constructing header
+        reservationInfo.append(String.format("%1$-" + (maxLengthVenueID + 2) + "s", "Venue ID"));
+        reservationInfo.append(String.format("%1$-" + (maxLengthDate + 2) + "s", "Date"));
+        reservationInfo.append(String.format("%1$-" + (maxLengthTime + 2) + "s", "Time"));
+        reservationInfo.append("\n");
+
+        // Constructing separator line
+        for (int i = 0; i < maxLengthVenueID + maxLengthDate + maxLengthTime + 6; i++) {
+            reservationInfo.append("-");
+        }
+        reservationInfo.append("\n");
+
+        // Constructing rows
+        for (Reservation r : reservations) {
+            reservationInfo.append(String.format("%1$-" + (maxLengthVenueID + 2) + "s", r.venueID));
+            reservationInfo.append(String.format("%1$-" + (maxLengthDate + 2) + "s", r.date));
+            reservationInfo.append(String.format("%1$-" + (maxLengthTime + 2) + "s", r.time));
+            reservationInfo.append("\n");
         }
         return reservationInfo.toString();
     }
