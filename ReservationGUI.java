@@ -5,15 +5,18 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
+import javax.swing.text.NumberFormatter;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 public class ReservationGUI {
     private static JFrame venueManagementFrame;
-
     private static ReservationManager reservationManager = new ReservationManager();
+
+    private static JComboBox<String> venueIDComboBox = new JComboBox<>();
 
     public static void display() {
         venueManagementFrame = new JFrame("University Venue Management System");
@@ -99,13 +102,11 @@ public class ReservationGUI {
         JPanel fieldPanel = new JPanel(new GridLayout(0, 2));
         fieldPanel.add(new JLabel("Venue ID:"));
 
-        JComboBox<String> venueIDComboBox = new JComboBox<>();
-        ;
         for (Venue v : reservationManager.venues) {
             venueIDComboBox.addItem(v.venueID);
         }
-        fieldPanel.add(venueIDComboBox);
 
+        fieldPanel.add(venueIDComboBox);
         fieldPanel.add(new JLabel("Date (YYYY/MM/DD):"));
 
         JTextField dateField;
@@ -184,14 +185,23 @@ public class ReservationGUI {
         JLabel venueIdLabel = new JLabel("Venue ID:");
         JTextField venueIdField = new JTextField();
         JLabel maxCapacityLabel = new JLabel("Max Capacity:");
-        JTextField maxCapacityField = new JFormattedTextField(createFormatter("####"));
-        JLabel venueFunctionLabel = new JLabel("Venue Function:");
+
+        NumberFormat format = NumberFormat.getInstance();
+        format.setGroupingUsed(false);// Remove comma from number greater than 4 digit
+        NumberFormatter numberFormatter = new NumberFormatter(format);
+        numberFormatter.setValueClass(Integer.class);
+        numberFormatter.setMinimum(0);
+        numberFormatter.setMaximum(9999);
+
+        JFormattedTextField maxCapacityField = new JFormattedTextField(numberFormatter);
+        maxCapacityField.setText("0");
+
         fieldPanel.add(venueIdLabel);
         fieldPanel.add(venueIdField);
         fieldPanel.add(maxCapacityLabel);
         fieldPanel.add(maxCapacityField);
 
-        ButtonGroup venueFunctionGroup = new ButtonGroup();
+        JLabel venueFunctionLabel = new JLabel("Venue Function:");
         JRadioButton lectureHallButton = new JRadioButton("Lecture Hall", true);
         lectureHallButton.setActionCommand("Lecture Hall");
         JRadioButton tutorialRoomButton = new JRadioButton("Tutorial Room");
@@ -205,6 +215,7 @@ public class ReservationGUI {
         JTextField otherVenueFunctionField;
         otherVenueFunctionField = new JTextField();
 
+        ButtonGroup venueFunctionGroup = new ButtonGroup();
         venueFunctionGroup.add(lectureHallButton);
         venueFunctionGroup.add(tutorialRoomButton);
         venueFunctionGroup.add(labRoomButton);
@@ -251,19 +262,20 @@ public class ReservationGUI {
             public void actionPerformed(ActionEvent e) {
                 String venueId = venueIdField.getText();
                 int maxCapacity = Integer.parseInt(maxCapacityField.getText());
-                String venueFunction;
-                if (otherVenueButton.isSelected()) {
-                    venueFunction = otherVenueFunctionField.getText();
-                } else {
-                    venueFunction = venueFunctionGroup.getSelection().getActionCommand();
-                }
+                String venueFunction = otherVenueButton.isSelected() ? otherVenueFunctionField.getText()
+                        : venueFunctionGroup.getSelection().getActionCommand();
 
-                if (reservationManager.isValidVenueInput(venueId, maxCapacity, venueFunction)) {
-                    reservationManager.addVenue(venueId, maxCapacity, venueFunction);
-                    displayArea.setText(reservationManager.displayVenue());
-                } else {
+                if (!reservationManager.isValidVenueInput(venueId, maxCapacity, venueFunction)) {
                     JOptionPane.showMessageDialog(null, "Invalid input! Please check the fields.", "Error",
                             JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                reservationManager.addVenue(venueId, maxCapacity, venueFunction);
+                displayArea.setText(reservationManager.displayVenue());
+                // Updates the Combo Box in the Venue ID list in Reservation Page.
+                venueIDComboBox.removeAllItems();
+                for (Venue v : reservationManager.venues) {
+                    venueIDComboBox.addItem(v.venueID);
                 }
             }
         });
@@ -272,18 +284,20 @@ public class ReservationGUI {
             public void actionPerformed(ActionEvent e) {
                 String venueId = venueIdField.getText();
                 int maxCapacity = Integer.parseInt(maxCapacityField.getText());
-                String venueFunction;
-                if (otherVenueButton.isSelected()) {
-                    venueFunction = otherVenueFunctionField.getText();
-                } else {
-                    venueFunction = venueFunctionGroup.getSelection().getActionCommand();
-                }
-                if (reservationManager.isValidVenueInput(venueId, maxCapacity, venueFunction)) {
-                    reservationManager.editVenue(venueId, maxCapacity, venueFunction);
-                    displayArea.setText(reservationManager.displayVenue());
-                } else {
+                String venueFunction = otherVenueButton.isSelected() ? otherVenueFunctionField.getText()
+                        : venueFunctionGroup.getSelection().getActionCommand();
+
+                if (!reservationManager.isValidVenueInput(venueId, maxCapacity, venueFunction)) {
                     JOptionPane.showMessageDialog(null, "Invalid input! Please check the fields.", "Error",
                             JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                reservationManager.editVenue(venueId, maxCapacity, venueFunction);
+                displayArea.setText(reservationManager.displayVenue());
+                // Updates the Combo Box in the Venue ID list in Reservation Page.
+                venueIDComboBox.removeAllItems();
+                for (Venue v : reservationManager.venues) {
+                    venueIDComboBox.addItem(v.venueID);
                 }
             }
         });
@@ -293,6 +307,11 @@ public class ReservationGUI {
                 String venueId = venueIdField.getText();
                 reservationManager.deleteVenue(venueId);
                 displayArea.setText(reservationManager.displayVenue());
+                // Updates the Combo Box in the Venue ID list in Reservation Page.
+                venueIDComboBox.removeAllItems();
+                for (Venue v : reservationManager.venues) {
+                    venueIDComboBox.addItem(v.venueID);
+                }
             }
         });
 
@@ -306,7 +325,6 @@ public class ReservationGUI {
         tabPanel.setVisible(true);
 
         return tabPanel;
-
     }
 
     private static String getCurrentTime() {
