@@ -1,16 +1,13 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import javax.swing.*;
-import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
+import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 
 public class ReservationGUI {
     private static JFrame venueManagementFrame;
@@ -109,9 +106,8 @@ public class ReservationGUI {
         fieldPanel.add(venueIDComboBox);
         fieldPanel.add(new JLabel("Date (YYYY/MM/DD):"));
 
-        JTextField dateField;
-        dateField = new JTextField();
-
+        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+        JFormattedTextField dateField = new JFormattedTextField(df);
         fieldPanel.add(dateField);
 
         fieldPanel.add(new JLabel("Time:"));
@@ -330,16 +326,5 @@ public class ReservationGUI {
     private static String getCurrentTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("YYYY/MM/dd HH:mm:ss");
         return sdf.format(new Date());
-    }
-
-    static protected MaskFormatter createFormatter(String s) {
-        MaskFormatter formatter = null;
-        try {
-            formatter = new MaskFormatter(s);
-        } catch (java.text.ParseException exc) {
-            System.err.println("formatter is bad: " + exc.getMessage());
-            System.exit(-1);
-        }
-        return formatter;
     }
 }
