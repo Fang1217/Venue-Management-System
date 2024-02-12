@@ -84,7 +84,7 @@ class ReservationManager {
             }
         }
         if (venueFound) {
-            System.out.println("The venue deleted successfully!");
+            System.out.println("The venue is deleted successfully!");
             saveVenue();
         } else {
             System.out.println("The venue does not exist.");
@@ -92,22 +92,30 @@ class ReservationManager {
     }
 
     void editVenue(String venueID, int maxCapacity, String venueFunction) {
+        boolean venueFound = false;
         for (Venue v : venues) {
             if (v.venueID.equals(venueID)) {
                 v.maxCapacity = maxCapacity;
                 v.venueFunction = venueFunction;
+                venueFound = true;
                 saveVenue();
             }
+        }
+        if (venueFound) {
+            System.out.println("The venue is edited successfully!");
+            saveVenue();
+        } else {
+            System.out.println("The venue does not exist.");
         }
     }
 
     void addReservation(String venueID, String date, String time) {
         boolean venueFound = false;
 
-        if (!reservations.isEmpty() && duplicateReservations(venueID, date, time)) {
-            System.out.println("The venue has been reserved by others at this time.");
-            return;
-        }
+            if (!reservations.isEmpty() && duplicateReservations(venueID, date, time)) {
+                System.out.println("The venue has been reserved by others at this time.");
+                return;
+            }
         for (Venue venue : venues) {
             if (venue.venueID.equals(venueID)) {
                 venueFound = true;

@@ -9,7 +9,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class ReservationGUI {
+public class ReservationGUI extends ReservationManager {
     private static JFrame venueManagementFrame;
     private static ReservationManager reservationManager = new ReservationManager();
 
